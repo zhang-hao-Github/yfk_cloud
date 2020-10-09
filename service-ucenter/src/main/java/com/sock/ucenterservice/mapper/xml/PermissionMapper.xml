@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sock.ucenterservice.mapper.PermissionMapper">
+
+    <select id="findPermissionValue" resultType="com.sock.common.entity.YfkPermission">
+                SELECT
+         d.`permission_value`
+        FROM
+          yfk_user a
+          LEFT JOIN yfk_user_role b
+            ON a.id = b.`user_id`
+            AND a.id = #{_parameter}
+          LEFT JOIN yfk_role_permission c
+            ON b.`role_id` = c.`role_id`
+          LEFT JOIN yfk_permission d
+            ON c.`permission_id` = d.`id`
+        GROUP BY d.id
+    </select>
+</mapper>

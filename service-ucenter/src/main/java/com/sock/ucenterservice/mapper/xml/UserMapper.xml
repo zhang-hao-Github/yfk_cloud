@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sock.ucenterservice.mapper.UserMapper">
+
+    <resultMap id="findUserinfoMap" type="com.sock.common.entity.YfkUser">
+        <id column="id" property="id"></id>
+        <result column="mobile" property="mobile"></result>
+        <result column="nick_name" property="nickName"></result>
+        <result column="password" property="password"></result>
+
+        <collection property="userRole" ofType="com.sock.common.entity.YfkUserRole">
+            <result column="role_id" property="roleId"></result>
+        </collection>
+    </resultMap>
+    <select id="findUserinfo" resultMap="findUserinfoMap">
+      SELECT b.`role_id`,a.`mobile`,a.`nick_name`,a.`id`,a.password FROM yfk_user a  LEFT JOIN yfk_user_role b ON a.`id`= b.`user_id`  WHERE a.`mobile`=#{mobile}
+    </select>
+</mapper>
+        <!--         SELECT b.`role_id`,a.`mobile`,a.`nick_name`,a.`id`,a.password FROM yfk_user a  LEFT JOIN yfk_user_role b ON a.`id`= b.`user_id`  WHERE a.`mobile`=#{mobile}
+
+        -->

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sock.rbacservice.mapper.YfkPermissionMapper">
+    <select id="findMenuByuserid" resultType="com.sock.common.entity.YfkPermission">
+          SELECT d.`pid`,d.`name`,d.`path`,d.`permission_value`,d.`id`  FROM yfk_user a RIGHT JOIN yfk_user_role b
+     ON a.id=b.`user_id` LEFT JOIN yfk_role_permission c  ON b.`role_id`=c.`role_id` RIGHT JOIN yfk_permission d ON c.`permission_id`=d.`id`
+	WHERE a.`id`=#{_parameter} AND d.`type`=1 GROUP BY d.`id`
+</select>
+
+    <select id="findMenuRoleid" resultType="com.sock.common.entity.YfkPermission">
+        SELECT a.id,a.name,a.permission_value,a.path,b.`role_id`
+   FROM yfk_permission a LEFT JOIN yfk_role_permission b ON a.id=b.permission_id WHERE  b.`role_id`=#{_parameter}
+
+    </select>
+</mapper>

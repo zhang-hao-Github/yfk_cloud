@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko" lang="ko">
+<head>
+    <title>Cross-Browser QRCode generator for Javascript</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
+    <script type="text/javascript" src="../js/jquery-3.2.1.js"></script>
+    <script type="text/javascript" src="../js/qrcode.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+
+
+<div id="app">
+    <div>
+        <el-row :gutter="10">
+            <el-col :md="7">
+                <div class="grid-content bg-purple">
+                    1
+                </div>
+            </el-col>
+            <el-col :md="10">
+                <div class="grid-content bg-purple-light" style="padding-top: 50px">
+                    <el-card class="box-card">
+                        <div slot="header" class="clearfix">
+                            <span>支付测试</span>
+                        </div>
+                        <div>
+                            <el-form ref="form" :model="PayParams" label-width="80px">
+                                <el-form-item label="支付金额">
+                                    <el-select v-model="PayParams.total_amount" placeholder="请选择">
+                                        <el-option
+                                                v-for="item in options"
+                                                :key="item.value"
+                                                :label="item.label"
+                                                :value="item.value">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="支付方式">
+                                    <el-radio-group v-model="PayParams.pay_method">
+                                        <el-radio label="1">
+                                            <img src="alipay0.png">
+                                            <br/>
+                                            &nbsp;&nbsp;&nbsp; 支付宝
+                                        </el-radio>
+                                        <el-radio label="2">
+                                            <img src="wxpay0.png">
+                                            <br/>
+                                            &nbsp;&nbsp;&nbsp;微信
+                                        </el-radio>
+                                    </el-radio-group>
+                                </el-form-item>
+                                <el-form-item>
+                                    <el-button type="primary" @click="getQrCode()">去支付</el-button>
+                                </el-form-item>
+                            </el-form>
+                        </div>
+                    </el-card>
+                </div>
+            </el-col>
+            <el-col :md="7">
+                <div class="grid-content bg-purple">
+                    1
+                </div>
+            </el-col>
+        </el-row>
+    </div>
+    <img src="alipay0.png">
+    <div id="qrcode"></div>
+
+</div>
+
+
+<script type="text/javascript">
+
+
+    const app = new Vue({
+        el: "#app",
+        data: {
+            //PayMethod out_trade_no subject total_amount
+            qrcode: "",
+            dialogVisible: false,
+            PayParams: {
+                pay_method: "",
+                out_trade_no: "",
+                subject: "支付测试",
+                total_amount: ""
+            },
+            options: [
+                {label: "￥0.01", value: "0.01"},
+                {label: "￥1", value: "1"},
+                {label: "￥5", value: "5"}]
+        },
+        created() {
+        },
+        methods: {
+            //二维码赋值
+            getQrCode() {
+
+                if (this.PayParams.pay_method == 2) {
+                    this.$message.error('微信支付暂未接入,敬请期待');
+                    return;
+                }
+                //生成订单号
+                this.generateOrder();
+                axios.post("/pay", this.PayParams).then(response => {
+                    this.qrcode = response.data.data.qrCode;
+                    console.log(response.data.data.qrCode);
+                    console.log(this.qrcode);
+                    // //
+                    this.showQrCode();
+
+                    //轮询 是否支付成功
+                    if (this.qrcode) {
+                        setTimeout(() => {
+                            this.poll();
+                        }, 1000)
+
+                    }
+
+                });
+                // this.poll();
+//204657894514841
+            },
+            poll() {
+                var $this = this;
+                axios.get("/payPoll/" + $this.PayParams.out_trade_no).then(response => {
+                    if (response.data.data.tradestatus == "TRADE_SUCCESS") {
+
+                        alert("支付成功谢谢您嘞");
+                    }
+                })
+                // var timer = setInterval(function () {
+                //     // 这里就是处理的事件
+                //     axios.get("/payPoll/" + $this.PayParams.out_trade_no).then(response => {
+                //         if (response.data.data.tradestatus == "TRADE_SUCCESS") {
+                //             clearInterval(timer);
+                //             alert("支付成功谢谢您嘞");
+                //         }
+                //     })
+                //
+                // }, 3000);
+
+
+            },
+            generateOrder() {
+                this.PayParams.out_trade_no = "Yfk" + (new Date()).valueOf();
+                console.log(this.PayParams.out_trade_no);
+            },
+            showQrCode() {
+                document.getElementById("qrcode").innerHTML = "";
+                var qrcode = new QRCode(document.getElementById("qrcode"), {
+                    text: this.qrcode,
+                    width: 264,
+                    height: 264,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                console.log(qrcode);
+            }
+        }
+    });
+
+
+</script>
+<style>
+    body {
+        background: url(background0.jpg) no-repeat center center;
+        background-size: cover;
+        background-attachment: fixed;
+        background-color: #CCCCCC;
+    }
+
+    .footer {
+        background-color: #00A3EE;
+        height: 40%;
+
+    }
+
+    .paybroderbody {
+        height: 60%;
+        background-color: #FFFFFF;
+    }
+
+    .qrCodeBasic {
+        height: 400px;
+
+    }
+
+    #qrcode {
+        z-index: 10;
+        position: absolute;
+        margin-top: -250px;
+    }
+</style>
+</body>

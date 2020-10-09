@@ -1,0 +1,26 @@
+server:
+  port: 8006
+spring:
+  application:
+    name: service-goods
+  #redis 配置
+  redis:
+    port: 6379
+    host: 192.168.11.111
+  #    数据库数据源
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://localhost:3306/sockfk
+    driver-class-name: com.mysql.jdbc.Driver
+    password: root
+    username: root
+logging:
+  level:
+    com.sock.goodsservice.mapper: debug
+#    root: info
+
+mybatis-plus:
+  mapper-locations: classpath:com/sock/*/mapper/xml/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
